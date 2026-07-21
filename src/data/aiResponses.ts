@@ -1,4 +1,5 @@
-import type { ChatMode, VocabWord } from '../types';
+import type { ChatMode, NativeLanguage, VocabWord } from '../types';
+import { getLeagueById } from './leagues';
 
 export interface TopicContent {
   text: string;
@@ -672,8 +673,48 @@ export function buildResponse(leagueId: string, mode: ChatMode, userMessage: str
   };
 }
 
-export function buildGreeting(leagueId: string) {
+// Name of each league's target language, written in the user's own native
+// language — so the very first thing a beginner reads is something they
+// can actually understand.
+const LEAGUE_LANGUAGE_IN_NATIVE: Record<string, Record<NativeLanguage, string>> = {
+  'premier-league': { pt: 'inglês', en: 'English', es: 'inglés' },
+  'la-liga': { pt: 'espanhol', en: 'Spanish', es: 'español' },
+  bundesliga: { pt: 'alemão', en: 'German', es: 'alemán' },
+  'serie-a': { pt: 'italiano', en: 'Italian', es: 'italiano' },
+  'ligue-1': { pt: 'francês', en: 'French', es: 'francés' },
+  brasileirao: { pt: 'português', en: 'Portuguese', es: 'portugués' },
+};
+
+const NATIVE_BRIDGE: Record<NativeLanguage, (persona: string, lang: string, emoji: string) => string> = {
+  pt: (persona, lang, emoji) =>
+    `Oi! ${emoji} Eu sou ${persona}. Vou te ensinar ${lang} através do futebol! No começo vou misturar bastante português com ${lang}, pra você ir se acostumando aos poucos, sem pressa. Bora lá:`,
+  en: (persona, lang, emoji) =>
+    `Hi! ${emoji} I'm ${persona}. I'm going to teach you ${lang} through football! I'll start by mixing in plenty of English with the ${lang}, so you can ease into it at your own pace. Here we go:`,
+  es: (persona, lang, emoji) =>
+    `¡Hola! ${emoji} Soy ${persona}. ¡Te voy a enseñar ${lang} a través del fútbol! Al principio voy a mezclar bastante español con el ${lang}, para que te vayas acostumbrando poco a poco, sin prisa. ¡Vamos!:`,
+};
+
+// When the user's native language already IS the league's language (e.g. a
+// Portuguese speaker picking Brasileirão, or an English speaker picking the
+// Premier League), the bridge sentence would be nonsensical ("I'll mix in
+// English with the English"), so it's skipped entirely.
+const NATIVE_LANGUAGE_LEAGUE: Record<NativeLanguage, string> = {
+  pt: 'brasileirao',
+  en: 'premier-league',
+  es: 'la-liga',
+};
+
+export function buildGreeting(leagueId: string, nativeLanguage: NativeLanguage = 'pt') {
   const bank = CONTENT_BANK[leagueId];
   const { text, highlights } = parseHighlights(bank.greeting.text);
-  return { text, highlights, quickActions: QUICK_ACTIONS };
+
+  if (NATIVE_LANGUAGE_LEAGUE[nativeLanguage] === leagueId) {
+    return { text, highlights, quickActions: QUICK_ACTIONS };
+  }
+
+  const persona = getLeagueById(leagueId)?.persona;
+  const personaFirstName = persona?.name.split(' ')[0] ?? '';
+  const targetLangName = LEAGUE_LANGUAGE_IN_NATIVE[leagueId][nativeLanguage];
+  const bridge = NATIVE_BRIDGE[nativeLanguage](personaFirstName, targetLangName, persona?.emoji ?? '🎙️');
+  return { text: `${bridge}\n\n${text}`, highlights, quickActions: QUICK_ACTIONS };
 }

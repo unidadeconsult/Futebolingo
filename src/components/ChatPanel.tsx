@@ -20,7 +20,7 @@ function nextId() {
 }
 
 export function ChatPanel({ league, onClose }: ChatPanelProps) {
-  const { incrementConversations, addXp, progress } = useApp();
+  const { incrementConversations, addXp, progress, user } = useApp();
   const [closing, setClosing] = useState(false);
   const [mode, setMode] = useState<ChatMode>('free');
   const [messagesByLeague, setMessagesByLeague] = useState<Record<string, ChatMessage[]>>({});
@@ -37,7 +37,7 @@ export function ChatPanel({ league, onClose }: ChatPanelProps) {
     setIsTyping(true);
     const delay = 900 + Math.random() * 600;
     const timer = setTimeout(() => {
-      const greeting = buildGreeting(league.id);
+      const greeting = buildGreeting(league.id, user?.nativeLanguage ?? 'pt');
       setMessagesByLeague((prev) => ({
         ...prev,
         [league.id]: [
