@@ -1,0 +1,85 @@
+.card {
+  background: var(--card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+.card-league {
+  border-top: 4px solid transparent;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.card-league:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+  border-top-color: var(--league-color, transparent);
+}
+
+.card-league.active {
+  background: rgba(26, 71, 42, 0.04);
+}
+
+.card-league .league-emoji {
+  font-size: 28px;
+}
+
+.card-league .league-name {
+  font-weight: 700;
+  font-size: 15px;
+  margin-top: 6px;
+}
+
+.card-league .league-lang {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.card-league .league-progress {
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 10px;
+  color: var(--text-secondary);
+}
+
+.card-stat {
+  padding: 16px;
+  text-align: center;
+  cursor: default;
+}
+
+.card-stat:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+}
+
+.card-stat .stat-emoji {
+  font-size: 22px;
+}
+
+.card-stat .stat-value {
+  font-size: 20px;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.card-stat .stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.card-progress {
+  padding: 24px;
+}
+
+.card-vocab {
+  background: var(--gradient-vocab);
+  border-left: 4px solid var(--success);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 10px;
+}
