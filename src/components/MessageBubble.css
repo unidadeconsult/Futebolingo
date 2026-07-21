@@ -32,10 +32,36 @@
   border-bottom-right-radius: 4px;
 }
 
+.message-text-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
 .message-text {
   font-size: 14.5px;
   line-height: 1.55;
   white-space: pre-wrap;
+  flex: 1;
+}
+
+.message-speak-btn {
+  border: none;
+  background: rgba(26, 71, 42, 0.08);
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.message-speak-btn:hover {
+  background: rgba(26, 71, 42, 0.18);
+  transform: scale(1.1);
 }
 
 .message-timestamp {

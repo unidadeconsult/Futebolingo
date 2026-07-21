@@ -15,6 +15,7 @@ export interface LeagueDef {
   emoji: string;
   languageName: string;
   languageFlag: string;
+  speechLang: string;
   matchesPlayed: number;
   matchesTotal: number;
   persona: PersonaDef;
@@ -34,6 +35,13 @@ export type ChatMode = 'lesson' | 'free';
 export interface VocabWord {
   word: string;
   meaning: string;
+}
+
+export interface DeckEntry extends VocabWord {
+  box: number;
+  dueAt: number;
+  addedAt: number;
+  lang: string;
 }
 
 export interface HighlightedWord {
@@ -69,6 +77,7 @@ export interface Progress {
   wordsLearned: number;
   hoursStudied: number;
   selectedLeagueId: string | null;
-  vocabDeck: VocabWord[];
+  vocabDeck: DeckEntry[];
   leagueMatches: Record<string, number>;
+  lastActiveDate: string | null;
 }

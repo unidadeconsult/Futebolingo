@@ -20,13 +20,15 @@ function nextId() {
 }
 
 export function ChatPanel({ league, onClose }: ChatPanelProps) {
-  const { incrementConversations, addXp } = useApp();
+  const { incrementConversations, addXp, progress } = useApp();
   const [closing, setClosing] = useState(false);
   const [mode, setMode] = useState<ChatMode>('free');
   const [messagesByLeague, setMessagesByLeague] = useState<Record<string, ChatMessage[]>>({});
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [recap, setRecap] = useState<{ xp: number; words: number } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const sessionStartRef = useRef({ xp: progress.xp, words: progress.vocabDeck.length });
 
   const messages = messagesByLeague[league.id] ?? [];
 
@@ -59,9 +61,19 @@ export function ChatPanel({ league, onClose }: ChatPanelProps) {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const handleClose = () => {
+  const finishClose = () => {
     setClosing(true);
     setTimeout(onClose, 250);
+  };
+
+  const handleClose = () => {
+    const deltaXp = progress.xp - sessionStartRef.current.xp;
+    const deltaWords = progress.vocabDeck.length - sessionStartRef.current.words;
+    if (deltaXp > 0 || deltaWords > 0) {
+      setRecap({ xp: deltaXp, words: deltaWords });
+    } else {
+      finishClose();
+    }
   };
 
   const sendMessage = (text: string) => {
@@ -112,7 +124,7 @@ export function ChatPanel({ league, onClose }: ChatPanelProps) {
   };
 
   return (
-    <div className={`chat-overlay ${closing ? 'closing' : ''}`} onClick={handleClose}>
+    <div className={`chat-overlay ${closing ? 'closing' : ''}`} onClick={recap ? undefined : handleClose}>
       <div className="chat-panel" onClick={(e) => e.stopPropagation()}>
         <header className="chat-header">
           <div className="chat-header-avatar">{league.persona.emoji}</div>
@@ -125,52 +137,78 @@ export function ChatPanel({ league, onClose }: ChatPanelProps) {
           </button>
         </header>
 
-        <div className="chat-mode-toggle-wrap">
-          <div className="chat-mode-toggle">
-            <button
-              className={mode === 'lesson' ? 'active' : ''}
-              onClick={() => setMode('lesson')}
-              type="button"
-            >
-              📚 Modo Aula
-            </button>
-            <button className={mode === 'free' ? 'active' : ''} onClick={() => setMode('free')} type="button">
-              💬 Conversa Livre
-            </button>
-          </div>
-        </div>
-
-        <div className="chat-suggestions">
-          {TOPIC_SUGGESTIONS.map((chip) => (
-            <Button key={chip} variant="chip" onClick={() => sendMessage(chip)}>
-              {chip}
-            </Button>
-          ))}
-        </div>
-
-        <div className="chat-messages" ref={scrollRef}>
-          {messages.map((m) => (
-            <MessageBubble key={m.id} message={m} onQuickAction={sendMessage} />
-          ))}
-          {isTyping && (
-            <div className="message-row from-ai">
-              <TypingIndicator />
+        {recap ? (
+          <div className="chat-recap">
+            <div className="chat-recap-emoji">🏅</div>
+            <h3>Boa! Sessão concluída</h3>
+            <div className="chat-recap-stats">
+              {recap.xp > 0 && (
+                <div className="chat-recap-stat">
+                  <span className="chat-recap-value">+{recap.xp}</span>
+                  <span className="chat-recap-label">XP ganho</span>
+                </div>
+              )}
+              {recap.words > 0 && (
+                <div className="chat-recap-stat">
+                  <span className="chat-recap-value">+{recap.words}</span>
+                  <span className="chat-recap-label">{recap.words === 1 ? 'palavra nova' : 'palavras novas'}</span>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+            <Button onClick={finishClose} fullWidth>
+              Voltar ao Dashboard
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="chat-mode-toggle-wrap">
+              <div className="chat-mode-toggle">
+                <button
+                  className={mode === 'lesson' ? 'active' : ''}
+                  onClick={() => setMode('lesson')}
+                  type="button"
+                >
+                  📚 Modo Aula
+                </button>
+                <button className={mode === 'free' ? 'active' : ''} onClick={() => setMode('free')} type="button">
+                  💬 Conversa Livre
+                </button>
+              </div>
+            </div>
 
-        <form className="chat-input-area" onSubmit={handleSubmit}>
-          <AutoTextarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Digite sua mensagem..."
-            aria-label="Mensagem"
-          />
-          <Button variant="icon" type="submit" disabled={!input.trim()} aria-label="Enviar mensagem">
-            ➤
-          </Button>
-        </form>
+            <div className="chat-suggestions">
+              {TOPIC_SUGGESTIONS.map((chip) => (
+                <Button key={chip} variant="chip" onClick={() => sendMessage(chip)}>
+                  {chip}
+                </Button>
+              ))}
+            </div>
+
+            <div className="chat-messages" ref={scrollRef}>
+              {messages.map((m) => (
+                <MessageBubble key={m.id} message={m} onQuickAction={sendMessage} speechLang={league.speechLang} />
+              ))}
+              {isTyping && (
+                <div className="message-row from-ai">
+                  <TypingIndicator />
+                </div>
+              )}
+            </div>
+
+            <form className="chat-input-area" onSubmit={handleSubmit}>
+              <AutoTextarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Digite sua mensagem..."
+                aria-label="Mensagem"
+              />
+              <Button variant="icon" type="submit" disabled={!input.trim()} aria-label="Enviar mensagem">
+                ➤
+              </Button>
+            </form>
+          </>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import type { CEFRLevel, NativeLanguage, Progress, UserProfile, VocabWord } from '../types';
+import type { CEFRLevel, DeckEntry, NativeLanguage, Progress, UserProfile, VocabWord } from '../types';
 import { LEAGUES } from '../data/leagues';
+import { nextBox, nextDueAt } from '../utils/spacedRepetition';
 
 const USER_KEY = 'futbolingo:user';
 const PROGRESS_KEY = 'futbolingo:progress';
@@ -30,6 +31,7 @@ function defaultProgress(level: CEFRLevel): Progress {
     selectedLeagueId: null,
     vocabDeck: [],
     leagueMatches,
+    lastActiveDate: null,
   };
 }
 
@@ -42,6 +44,10 @@ function loadJSON<T>(key: string): T | null {
   }
 }
 
+function toDateKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
 interface AppContextValue {
   user: UserProfile | null;
   progress: Progress;
@@ -50,9 +56,10 @@ interface AppContextValue {
   logout: () => void;
   selectLeague: (leagueId: string) => void;
   addXp: (amount: number) => void;
-  addVocabWord: (word: VocabWord) => void;
+  addVocabWord: (word: VocabWord, lang: string) => void;
   isWordSaved: (word: string) => boolean;
   incrementConversations: () => void;
+  reviewWord: (word: string, correct: boolean) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -72,6 +79,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
   }, [progress]);
+
+  // Real streak: bump once per calendar day the user actually opens the app,
+  // reset if a day was skipped.
+  useEffect(() => {
+    if (!user) return;
+    setProgress((p) => {
+      const today = toDateKey(new Date());
+      if (p.lastActiveDate === today) return p;
+      const yesterday = toDateKey(new Date(Date.now() - 24 * 60 * 60 * 1000));
+      const streak = p.lastActiveDate === yesterday ? p.streak + 1 : 1;
+      return { ...p, streak, lastActiveDate: today };
+    });
+  }, [user]);
 
   const login = (name: string, nativeLanguage: NativeLanguage, level: CEFRLevel) => {
     setUser({ name: name.trim() || 'Craque', nativeLanguage, level, isGuest: false });
@@ -108,10 +128,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const addVocabWord = (word: VocabWord) => {
+  const addVocabWord = (word: VocabWord, lang: string) => {
     setProgress((p) => {
       if (p.vocabDeck.some((w) => w.word === word.word)) return p;
-      return { ...p, vocabDeck: [...p.vocabDeck, word], wordsLearned: p.wordsLearned + 1 };
+      const entry: DeckEntry = { ...word, box: 0, dueAt: nextDueAt(0), addedAt: Date.now(), lang };
+      return { ...p, vocabDeck: [...p.vocabDeck, entry], wordsLearned: p.wordsLearned + 1 };
     });
     addXp(10);
   };
@@ -120,6 +141,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const incrementConversations = () => {
     setProgress((p) => ({ ...p, conversations: p.conversations + 1 }));
+  };
+
+  const reviewWord = (word: string, correct: boolean) => {
+    setProgress((p) => ({
+      ...p,
+      vocabDeck: p.vocabDeck.map((entry) => {
+        if (entry.word !== word) return entry;
+        const box = nextBox(entry.box, correct);
+        return { ...entry, box, dueAt: nextDueAt(box) };
+      }),
+    }));
+    addXp(correct ? 5 : 1);
   };
 
   const value = useMemo<AppContextValue>(
@@ -134,6 +167,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addVocabWord,
       isWordSaved,
       incrementConversations,
+      reviewWord,
     }),
     [user, progress],
   );

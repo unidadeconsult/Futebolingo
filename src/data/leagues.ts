@@ -8,6 +8,7 @@ export const LEAGUES: LeagueDef[] = [
     emoji: '⚽',
     languageName: 'Inglês',
     languageFlag: '🏴',
+    speechLang: 'en-GB',
     matchesPlayed: 3,
     matchesTotal: 5,
     persona: {
@@ -27,6 +28,7 @@ export const LEAGUES: LeagueDef[] = [
     emoji: '⚽',
     languageName: 'Espanhol',
     languageFlag: '🇪🇸',
+    speechLang: 'es-ES',
     matchesPlayed: 2,
     matchesTotal: 5,
     persona: {
@@ -46,6 +48,7 @@ export const LEAGUES: LeagueDef[] = [
     emoji: '⚽',
     languageName: 'Alemão',
     languageFlag: '🇩🇪',
+    speechLang: 'de-DE',
     matchesPlayed: 1,
     matchesTotal: 5,
     persona: {
@@ -65,6 +68,7 @@ export const LEAGUES: LeagueDef[] = [
     emoji: '⚽',
     languageName: 'Italiano',
     languageFlag: '🇮🇹',
+    speechLang: 'it-IT',
     matchesPlayed: 0,
     matchesTotal: 5,
     persona: {
@@ -84,6 +88,7 @@ export const LEAGUES: LeagueDef[] = [
     emoji: '⚽',
     languageName: 'Francês',
     languageFlag: '🇫🇷',
+    speechLang: 'fr-FR',
     matchesPlayed: 0,
     matchesTotal: 5,
     persona: {
@@ -103,6 +108,7 @@ export const LEAGUES: LeagueDef[] = [
     emoji: '⚽',
     languageName: 'Português',
     languageFlag: '🇧🇷',
+    speechLang: 'pt-BR',
     matchesPlayed: 5,
     matchesTotal: 5,
     persona: {

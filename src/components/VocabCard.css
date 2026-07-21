@@ -29,6 +29,32 @@
   gap: 12px;
 }
 
+.vocab-word-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.vocab-speak-btn {
+  border: none;
+  background: rgba(26, 71, 42, 0.08);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.vocab-speak-btn:hover {
+  background: rgba(26, 71, 42, 0.18);
+  transform: scale(1.1);
+}
+
 .vocab-card-list strong {
   font-size: 14px;
   color: var(--text-primary);

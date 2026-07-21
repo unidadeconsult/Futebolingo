@@ -6,14 +6,17 @@ import { Avatar } from '../components/Avatar';
 import { Badge } from '../components/Badge';
 import { ProgressBar } from '../components/ProgressBar';
 import { ChatPanel } from '../components/ChatPanel';
+import { VocabReview } from '../components/VocabReview';
 import './Dashboard.css';
 
 export function Dashboard() {
   const { user, progress, selectLeague, logout } = useApp();
   const [chatOpen, setChatOpen] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
 
   const selectedLeague = LEAGUES.find((l) => l.id === progress.selectedLeagueId) ?? null;
   const initial = (user?.name ?? 'V').charAt(0).toUpperCase();
+  const dueCount = progress.vocabDeck.filter((w) => w.dueAt <= Date.now()).length;
 
   const handleOpenChat = () => {
     if (selectedLeague) setChatOpen(true);
@@ -59,7 +62,16 @@ export function Dashboard() {
             <div className="stat-value">{progress.conversations}</div>
             <div className="stat-label">Conversas</div>
           </Card>
-          <Card className="card-stat">
+          <Card
+            className="card-stat card-stat-clickable"
+            role="button"
+            tabIndex={0}
+            onClick={() => setReviewOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') setReviewOpen(true);
+            }}
+          >
+            {dueCount > 0 && <span className="card-stat-badge">{dueCount}</span>}
             <div className="stat-emoji">📚</div>
             <div className="stat-value">{progress.wordsLearned}</div>
             <div className="stat-label">Palavras</div>
@@ -118,10 +130,10 @@ export function Dashboard() {
         title={selectedLeague ? 'Abrir chat' : 'Escolha uma liga primeiro'}
       >
         💬
-        <span className="chat-fab-badge">3</span>
       </button>
 
       {chatOpen && selectedLeague && <ChatPanel league={selectedLeague} onClose={() => setChatOpen(false)} />}
+      {reviewOpen && <VocabReview onClose={() => setReviewOpen(false)} />}
     </div>
   );
 }
