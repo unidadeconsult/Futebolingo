@@ -48,6 +48,20 @@
   gap: 12px;
 }
 
+.logout-btn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  line-height: 0;
+}
+
+.logout-btn:hover .avatar,
+.logout-btn:focus-visible .avatar {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6);
+}
+
 .dashboard-content {
   max-width: 900px;
   margin: 0 auto;

@@ -9,7 +9,7 @@ import { ChatPanel } from '../components/ChatPanel';
 import './Dashboard.css';
 
 export function Dashboard() {
-  const { user, progress, selectLeague } = useApp();
+  const { user, progress, selectLeague, logout } = useApp();
   const [chatOpen, setChatOpen] = useState(false);
 
   const selectedLeague = LEAGUES.find((l) => l.id === progress.selectedLeagueId) ?? null;
@@ -29,9 +29,11 @@ export function Dashboard() {
           </div>
           <div className="dashboard-header-right">
             <Badge variant="streak">🔥 {progress.streak} dias</Badge>
-            <Avatar size={38} gradient="gold">
-              {initial}
-            </Avatar>
+            <button className="logout-btn" onClick={logout} title="Sair" aria-label="Sair da conta">
+              <Avatar size={38} gradient="gold">
+                {initial}
+              </Avatar>
+            </button>
           </div>
         </div>
       </header>

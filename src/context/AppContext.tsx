@@ -17,16 +17,16 @@ const XP_GOAL_BY_LEVEL: Record<CEFRLevel, { xp: number; next: CEFRLevel }> = {
 function defaultProgress(level: CEFRLevel): Progress {
   const goal = XP_GOAL_BY_LEVEL[level];
   const leagueMatches: Record<string, number> = {};
-  LEAGUES.forEach((l) => (leagueMatches[l.id] = l.matchesPlayed));
+  LEAGUES.forEach((l) => (leagueMatches[l.id] = 0));
   return {
-    xp: 650,
+    xp: 0,
     xpGoal: goal.xp,
     level,
     nextLevel: goal.next,
-    streak: 7,
-    conversations: 142,
-    wordsLearned: 89,
-    hoursStudied: 12,
+    streak: 0,
+    conversations: 0,
+    wordsLearned: 0,
+    hoursStudied: 0,
     selectedLeagueId: null,
     vocabDeck: [],
     leagueMatches,
