@@ -80,4 +80,5 @@ export interface Progress {
   vocabDeck: DeckEntry[];
   leagueMatches: Record<string, number>;
   lastActiveDate: string | null;
+  schemaVersion: number;
 }

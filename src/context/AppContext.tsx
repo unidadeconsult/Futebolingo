@@ -6,6 +6,11 @@ import { nextBox, nextDueAt } from '../utils/spacedRepetition';
 const USER_KEY = 'futbolingo:user';
 const PROGRESS_KEY = 'futbolingo:progress';
 
+// Bump this whenever the Progress shape or its starting values change, so
+// visitors carrying an older localStorage blob get a clean reset instead of
+// silently keeping stale/mocked numbers forever.
+const CURRENT_SCHEMA_VERSION = 2;
+
 const XP_GOAL_BY_LEVEL: Record<CEFRLevel, { xp: number; next: CEFRLevel }> = {
   A1: { xp: 500, next: 'A2' },
   A2: { xp: 1000, next: 'B1' },
@@ -32,6 +37,7 @@ function defaultProgress(level: CEFRLevel): Progress {
     vocabDeck: [],
     leagueMatches,
     lastActiveDate: null,
+    schemaVersion: CURRENT_SCHEMA_VERSION,
   };
 }
 
@@ -68,7 +74,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(() => loadJSON<UserProfile>(USER_KEY));
   const [progress, setProgress] = useState<Progress>(() => {
     const stored = loadJSON<Progress>(PROGRESS_KEY);
-    return stored ?? defaultProgress('A2');
+    if (!stored || stored.schemaVersion !== CURRENT_SCHEMA_VERSION) {
+      return defaultProgress('A2');
+    }
+    return stored;
   });
 
   useEffect(() => {
